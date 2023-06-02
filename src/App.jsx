@@ -10,47 +10,54 @@ const correctBoard = [
   [5, 4, 6, 5],
 ]
 
-
 function App() {
+  
   const [Board, setBoard] = useState([
     [0, 0, 0, 0],
     [0, 0, 0, 0],
     [0, 0, 0, 0],
     [0, 0, 0, 0],
   ])
+  let [row, setRow] = useState([]);
+  let [col, setCol] = useState([]);
 
-  let [matchingPair, setmatchingPair] = useState([])
-  let [moves, setMoves] = useState(0)
-
-  const fillBoard = (r, c) => {
-    let newBoard = JSON.parse(JSON.stringify(Board))
-    if(matchingPair.length === 2) {
-      let x = +matchingPair[0][0]
-      let y = +matchingPair[0][1]
-      let x1 = +matchingPair[1][0]
-      let y1 = +matchingPair[1][1]
-      if(correctBoard[x][y] !== correctBoard[x1][y1]){
-        newBoard[x][y] = 0;
-        newBoard[x1][y1] = 0;
-      }
-      newBoard[r][c] = correctBoard[r][c];
-      setBoard(newBoard)
-      setmatchingPair(['' + r + c])
-      setMoves(moves + 1)
-      return;
-    }
-
-    newBoard[r][c] = correctBoard[r][c];
-    console.log(newBoard);
-    setBoard(newBoard)
-    setmatchingPair([...matchingPair, '' + r  + c])
+  const getRowAndCol = (r, c) => {
+    setCol([...col, c]);
+    setRow([...row, r])
   }
 
+  useEffect(() => {
+    if(row.length === 2){
+     let id  = setTimeout(() => {
+        let r1 = row[0];
+        let c1 = col[0];
+        let r2 = row[1];
+        let c2 = col[1];
+        let newBoard = JSON.parse(JSON.stringify(Board));
+        if(correctBoard[r1][c1] !== correctBoard[r2][c2]){
+          newBoard[r1][c1] = 0;
+          newBoard[r2][c2] = 0;
+          setBoard(newBoard)
+        }
+      }, 500)
 
+      return () => {
+        return clearInterval(id)
+      }
+    }
+    if(row.length === 3){
+      let newRow = [row[2]];
+      let newCol = [col[2]];
+      setCol(newCol);
+      setRow(newRow)
+    }
+  },[row, col])
 
+  // console.log('row', row);
+  // console.log('col', col);
   return (
     <div className="App">
-      <h1>Moves : {moves}</h1>
+     
       <main className='wrapper'>
         {
           Board.map((row, r) => {
@@ -59,7 +66,12 @@ function App() {
                 {row.map((elm, c) => {
                   return <button
                     key={c}
-                    onClick={() => fillBoard(r, c)}
+                    onClick={() => {
+                      getRowAndCol(r, c)
+                      let newBoard = JSON.parse(JSON.stringify(Board))
+                      newBoard[r][c] = correctBoard[r][c]
+                      setBoard(newBoard)
+                    }}
                     style={{
                       background: 'red',
                     }}>{elm}</button>
